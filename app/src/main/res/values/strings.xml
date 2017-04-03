@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EmotionApp</string>
+    <string name="app_name">Mood Music</string>
 
     <!-- Emotion subscription key -->
     <!-- Please refer to https://www.projectoxford.ai/ to get your subscription key -->
