@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
             imageUri = data.getData();
           }
 
-          Intent intent = new Intent(mContext, RecognizeActivity.class);
-          intent.putExtra(RecognizeActivity.PHOTO_URI, imageUri);
+          Intent intent = new Intent(mContext, MoodActivity.class);
+          intent.putExtra(MoodActivity.PHOTO_URI, imageUri);
           startActivity(intent);
 
         }

@@ -13,27 +13,35 @@
     android:roundIcon="@drawable/ic_launcher"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
-    <activity android:name=".MainActivity"
-      android:screenOrientation="portrait"
-      >
+    <activity
+      android:name=".MainActivity"
+      android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name=".RecognizeActivity"
+    <activity
+      android:name=".RecognizeActivity"
       android:parentActivityName=".MainActivity"
-      android:screenOrientation="portrait"
-      >
+      android:screenOrientation="portrait">
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value=".MainActivity" />
-
     </activity>
-    <activity android:name=".helper.SelectImageActivity"
+    <activity
+      android:name=".helper.SelectImageActivity"
       android:screenOrientation="portrait">
-
+    </activity>
+    <activity
+      android:name=".MoodActivity"
+      android:label="@string/title_activity_mood"
+      android:parentActivityName=".MainActivity"
+      android:theme="@style/AppTheme.NoActionBar">
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="shetty.devesh.com.emotionapp.MainActivity" />
     </activity>
   </application>
 
