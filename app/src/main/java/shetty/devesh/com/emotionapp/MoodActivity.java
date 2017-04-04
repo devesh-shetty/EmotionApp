@@ -69,6 +69,7 @@ public class MoodActivity extends AppCompatActivity {
 
   private BeatBox mBeatBox;
 
+  private  boolean isAutoPlayEnabled = true;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -344,6 +345,10 @@ public class MoodActivity extends AppCompatActivity {
       mSoundButton.setText(mSound.getName());
     }
 
+    public void playSound(){
+      mBeatBox.play(mSound);
+    }
+
     @Override
     public void onClick(View view) {
       mBeatBox.play(mSound);
@@ -367,6 +372,10 @@ public class MoodActivity extends AppCompatActivity {
     public void onBindViewHolder(SoundHolder holder, int position) {
       Sound sound = mSounds.get(position);
       holder.bindSound(sound);
+      if(position == 0 && isAutoPlayEnabled){
+        isAutoPlayEnabled = false;
+        holder.playSound();
+      }
     }
 
     @Override

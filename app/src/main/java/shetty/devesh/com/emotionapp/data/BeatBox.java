@@ -1,6 +1,7 @@
 package shetty.devesh.com.emotionapp.data;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
@@ -23,6 +24,8 @@ public class BeatBox {
   private List<Sound> mSounds = new ArrayList<>();
   private static final int MAX_SOUNDS = 1;
   private SoundPool mSoundPool;
+
+  private Sound mCurrentSound;
 
 
   private AssetManager mAssetManager;
@@ -60,9 +63,26 @@ public class BeatBox {
   public void play(Sound sound) {
     Integer soundId = sound.getSoundId();
     if (soundId == null) {
-      return; }
+      return;
+    }
+    mCurrentSound = sound;
     mSoundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f);
   }
+
+  public void pause(Sound sound){
+    Integer soundId = sound.getSoundId();
+    if (soundId == null) {
+      return; }
+    mSoundPool.pause(soundId);
+  }
+
+  public void pauseCurrentSound(){
+    if(mCurrentSound == null){
+      return;
+    }
+    pause(mCurrentSound);
+  }
+
 
   public List<Sound> getSounds() {
     return mSounds;
