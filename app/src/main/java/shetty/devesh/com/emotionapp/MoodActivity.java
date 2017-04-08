@@ -71,6 +71,8 @@ public class MoodActivity extends AppCompatActivity {
 
   private  boolean isAutoPlayEnabled = true;
 
+  private FloatingActionButton fab;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -81,12 +83,21 @@ public class MoodActivity extends AppCompatActivity {
     mBeatBox = new BeatBox(this);
 
 
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+      fab = (FloatingActionButton) findViewById(R.id.fab_music_control);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-          .setAction("Action", null).show();
+        if(mRecyclerViewSongs.getChildCount() > 0){
+          if(mBeatBox.isMediaPlaying()){
+            fab.setImageResource(android.R.drawable.ic_media_play);
+            mBeatBox.pause();
+          }
+          else
+          {
+            fab.setImageResource(android.R.drawable.ic_media_pause);
+            mBeatBox.play();
+          }
+        }
       }
     });
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -103,7 +114,7 @@ public class MoodActivity extends AppCompatActivity {
       client = new EmotionServiceRestClient(getString(R.string.subscription_key));
     }
 
-    mTextViewResult = (TextView) findViewById(R.id.tv_result);
+    mTextViewResult = (TextView) findViewById(R.id.tv_mood_result);
 
     Intent intent = getIntent();
 
@@ -311,7 +322,7 @@ public class MoodActivity extends AppCompatActivity {
 
             }
 
-           // mTextViewResult.setText(text);
+            mTextViewResult.setText(text);
 
             faceCanvas.drawRect(r.faceRectangle.left,
               r.faceRectangle.top,
@@ -374,6 +385,7 @@ public class MoodActivity extends AppCompatActivity {
       holder.bindSound(sound);
       if(position == 0 && isAutoPlayEnabled){
         isAutoPlayEnabled = false;
+        fab.setImageResource(android.R.drawable.ic_media_pause);
         holder.playSound();
       }
     }

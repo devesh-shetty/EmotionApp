@@ -7,13 +7,19 @@ package shetty.devesh.com.emotionapp.model;
 public class Sound {
   private String mAssetPath;
   private String mName;
-  private Integer mSoundId;
+  private int index;
 
+  public int getIndex() {
+    return index;
+  }
+  public void setIndex(int index) {
+    this.index = index;
+  }
   public Sound(String assetPath) {
     mAssetPath = assetPath;
     String[] components = assetPath.split("/");
     String filename = components[components.length - 1];
-    mName = filename.replace(".wav", "");
+    mName = filename.replace(".mp3", "");
   }
   public String getAssetPath() {
     return mAssetPath;
@@ -21,10 +27,5 @@ public class Sound {
   public String getName() {
     return mName;
   }
-  public Integer getSoundId() {
-    return mSoundId;
-  }
-  public void setSoundId(Integer soundId) {
-    mSoundId = soundId;
-  }
+
 }
