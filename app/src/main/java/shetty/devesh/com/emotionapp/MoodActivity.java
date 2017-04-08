@@ -362,6 +362,7 @@ public class MoodActivity extends AppCompatActivity {
 
     @Override
     public void onClick(View view) {
+      fab.setImageResource(android.R.drawable.ic_media_pause);
       mBeatBox.play(mSound);
     }
   }
