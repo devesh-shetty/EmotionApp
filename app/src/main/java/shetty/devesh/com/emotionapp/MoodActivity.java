@@ -10,9 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -41,8 +39,7 @@ import java.util.List;
 
 import shetty.devesh.com.emotionapp.data.BeatBox;
 import shetty.devesh.com.emotionapp.helper.ImageHelper;
-import shetty.devesh.com.emotionapp.helper.SelectImageActivity;
-import shetty.devesh.com.emotionapp.model.Sound;
+import shetty.devesh.com.emotionapp.model.Song;
 
 public class MoodActivity extends AppCompatActivity {
 
@@ -343,7 +340,7 @@ public class MoodActivity extends AppCompatActivity {
   private class SoundHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
     public Button mSoundButton;
-    private Sound mSound;
+    private Song mSong;
 
     public SoundHolder(View itemView) {
       super(itemView);
@@ -351,27 +348,27 @@ public class MoodActivity extends AppCompatActivity {
       mSoundButton.setOnClickListener(this);
     }
 
-    public void bindSound(Sound sound) {
-      mSound = sound;
-      mSoundButton.setText(mSound.getName());
+    public void bindSound(Song sound) {
+      mSong = sound;
+      mSoundButton.setText(mSong.getName());
     }
 
     public void playSound(){
-      mBeatBox.play(mSound);
+      mBeatBox.play(mSong);
     }
 
     @Override
     public void onClick(View view) {
       fab.setImageResource(android.R.drawable.ic_media_pause);
-      mBeatBox.play(mSound);
+      mBeatBox.play(mSong);
     }
   }
 
   private class SoundAdapter extends RecyclerView.Adapter<SoundHolder>{
 
-    private List<Sound> mSounds;
-    public SoundAdapter(List<Sound> sounds) {
-      mSounds = sounds;
+    private List<Song> mSongs;
+    public SoundAdapter(List<Song> sounds) {
+      mSongs = sounds;
     }
 
     @Override
@@ -382,7 +379,7 @@ public class MoodActivity extends AppCompatActivity {
     }
     @Override
     public void onBindViewHolder(SoundHolder holder, int position) {
-      Sound sound = mSounds.get(position);
+      Song sound = mSongs.get(position);
       holder.bindSound(sound);
       if(position == 0 && isAutoPlayEnabled){
         isAutoPlayEnabled = false;
@@ -393,7 +390,7 @@ public class MoodActivity extends AppCompatActivity {
 
     @Override
     public int getItemCount() {
-      return mSounds.size();
+      return mSongs.size();
     }
   }
 

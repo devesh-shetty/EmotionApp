@@ -1,17 +1,20 @@
 package shetty.devesh.com.emotionapp.data;
 
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import shetty.devesh.com.emotionapp.model.Sound;
+import shetty.devesh.com.emotionapp.model.Song;
 
 /**
  * Created by deveshshetty on 26/03/17.
@@ -20,17 +23,20 @@ import shetty.devesh.com.emotionapp.model.Sound;
 public class BeatBox {
   private static final String TAG = "BeatBox";
   private static final String SOUNDS_FOLDER = "emotion_music";
-  private List<Sound> mSounds = new ArrayList<>();
+  private List<Song> mSongs = new ArrayList<>();
 
-  private Sound mCurrentSound;
+  private Song mCurrentSound;
 
   private MediaPlayer mMediaPlayer;
 
   private AssetManager mAssetManager;
 
+  private ContentResolver mContentResolver;
+
   public BeatBox(Context context){
     mAssetManager = context.getAssets();
 
+    mContentResolver = context.getContentResolver();
     mMediaPlayer = new MediaPlayer();
     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -39,7 +45,8 @@ public class BeatBox {
         togglePlayPause();
       }
     });
-    loadSounds();
+
+    loadSongsOnDevice();
 
     mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
@@ -59,27 +66,6 @@ public class BeatBox {
     }
   }
 
-  private void loadSounds() {
-    String[] soundNames;
-    try {
-      soundNames = mAssetManager.list(SOUNDS_FOLDER);
-      Log.i(TAG, "Found " + soundNames.length + " emotion_music");
-    } catch (IOException ioe) {
-      Log.e(TAG, "Could not list assets", ioe);
-      return; }
-
-    int index = 0;
-
-    for (String filename : soundNames) {
-        String assetPath = SOUNDS_FOLDER + "/" + filename;
-        Sound sound = new Sound(assetPath);
-        sound.setIndex(index++);
-        mSounds.add(sound);
-      }
-
-
-  }
-
   public boolean isMediaPlaying(){
     return mMediaPlayer.isPlaying();
   }
@@ -97,29 +83,29 @@ public class BeatBox {
   }
 
   public void playFirstSong(){
-    Sound sound = mSounds.get(0);
+    Song sound = mSongs.get(0);
     play(sound);
 
   }
 
   public void playNextSong(){
-    Sound sound = nextSound();
+    Song sound = nextSound();
     play(sound);
   }
 
-  public Sound nextSound(){
-    Sound sound = null;
+  public Song nextSound(){
+    Song sound = null;
 
     int index = mCurrentSound.getIndex();
     index++;
-    index = (index%mSounds.size());
+    index = (index% mSongs.size());
 
-    sound = mSounds.get(index);
+    sound = mSongs.get(index);
 
     return sound;
   }
 
-  public void play(Sound sound) {
+  public void play(Song sound) {
 
       mMediaPlayer.stop();
     //call reset to get it back to idle state
@@ -127,8 +113,7 @@ public class BeatBox {
 
     try {
       mCurrentSound = sound;
-      AssetFileDescriptor afd = mAssetManager.openFd(sound.getAssetPath());
-      mMediaPlayer.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+      mMediaPlayer.setDataSource(sound.getPath());
       mMediaPlayer.prepare();
     } catch (IOException e) {
       e.printStackTrace();
@@ -136,10 +121,39 @@ public class BeatBox {
   }
 
 
-  public List<Sound> getSounds() {
-    return mSounds;
+  public List<Song> getSounds() {
+    return mSongs;
   }
 
+  public void loadSongsOnDevice(){
+
+    Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+    Cursor songCursor = mContentResolver.query(songUri, null, null, null, null);
+
+    if(songCursor != null && songCursor.moveToFirst())
+    {
+      int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
+      int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+      int songLocation = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+
+      int index = 0;
+
+      do {
+
+        String path = songCursor.getString(songLocation);
+        Song sound = new Song(path);
+        sound.setIndex(index++);
+        mSongs.add(sound);
+
+        //long currentId = songCursor.getLong(songId);
+        //String currentTitle = songCursor.getString(songTitle);
+        //arrayList.add(new Songs(currentId, currentTitle, currentArtist));
+      } while(songCursor.moveToNext());
+    }
+
+    songCursor.close();
+
+  }
 
 
 }
