@@ -80,7 +80,7 @@ public class MoodActivity extends AppCompatActivity {
     mBeatBox = new BeatBox(this);
 
 
-      fab = (FloatingActionButton) findViewById(R.id.fab_music_control);
+    fab = (FloatingActionButton) findViewById(R.id.fab_music_control);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -100,7 +100,7 @@ public class MoodActivity extends AppCompatActivity {
     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     mProgressBar = (ProgressBar) findViewById(R.id.progressBar_cyclic);
-//    mProgressBar.setVisibility(View.VISIBLE);
+    //    mProgressBar.setVisibility(View.VISIBLE);
 
     mRecyclerViewSongs = (RecyclerView) findViewById(R.id.rcv_songs);
 

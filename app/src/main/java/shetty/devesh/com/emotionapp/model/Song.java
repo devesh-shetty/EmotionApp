@@ -2,9 +2,15 @@ package shetty.devesh.com.emotionapp.model;
 
 /**
  * Created by deveshshetty on 26/03/17.
+ *
+ * TODO: update to using a builder pattern
+ *
  */
 
 public class Song {
+
+  private long id;
+
   private String mPath;
   private String mName;
   private int index;
@@ -20,6 +26,13 @@ public class Song {
     String[] components = path.split("/");
     String filename = components[components.length - 1];
     mName = filename.replace(".mp3", "");
+  }
+
+  public Song(long id, String mPath, String mName, int index) {
+    this.id = id;
+    this.mPath = mPath;
+    this.mName = mName;
+    this.index = index;
   }
   public String getPath() {
     return mPath;

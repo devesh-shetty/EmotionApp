@@ -1,18 +1,26 @@
 package shetty.devesh.com.emotionapp.data;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import shetty.devesh.com.emotionapp.model.Song;
 
@@ -22,19 +30,16 @@ import shetty.devesh.com.emotionapp.model.Song;
 
 public class BeatBox {
   private static final String TAG = "BeatBox";
-  private static final String SOUNDS_FOLDER = "emotion_music";
+  private static final long MIN_SONG_DURATION = 90000;
   private List<Song> mSongs = new ArrayList<>();
 
   private Song mCurrentSound;
 
   private MediaPlayer mMediaPlayer;
 
-  private AssetManager mAssetManager;
-
   private ContentResolver mContentResolver;
 
   public BeatBox(Context context){
-    mAssetManager = context.getAssets();
 
     mContentResolver = context.getContentResolver();
     mMediaPlayer = new MediaPlayer();
@@ -122,32 +127,48 @@ public class BeatBox {
 
 
   public List<Song> getSounds() {
-    return mSongs;
+
+    int size = mSongs.size();
+
+    Random random = new Random();
+    int newSize = random.nextInt(size);
+
+    Collections.shuffle(mSongs);
+
+    return mSongs.subList(0, newSize);
   }
 
   public void loadSongsOnDevice(){
 
     Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-    Cursor songCursor = mContentResolver.query(songUri, null, null, null, null);
+    String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+
+    Cursor songCursor = mContentResolver.query(songUri, null, selection, null, null);
 
     if(songCursor != null && songCursor.moveToFirst())
     {
       int songId = songCursor.getColumnIndex(MediaStore.Audio.Media._ID);
       int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
       int songLocation = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+      int durationColumnIndex = songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
 
       int index = 0;
 
       do {
 
         String path = songCursor.getString(songLocation);
-        Song sound = new Song(path);
-        sound.setIndex(index++);
-        mSongs.add(sound);
+        long currentId = songCursor.getLong(songId);
+        String currentTitle = songCursor.getString(songTitle);
+        long duration = songCursor.getLong(durationColumnIndex);
 
-        //long currentId = songCursor.getLong(songId);
-        //String currentTitle = songCursor.getString(songTitle);
-        //arrayList.add(new Songs(currentId, currentTitle, currentArtist));
+        if(duration < MIN_SONG_DURATION){
+          //if duration is less than 1.5 min then don't add it to the list
+          continue;
+        }
+
+        Song song = new Song(currentId, path, currentTitle, index++);
+        mSongs.add(song);
+
       } while(songCursor.moveToNext());
     }
 

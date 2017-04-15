@@ -1,9 +1,11 @@
 package shetty.devesh.com.emotionapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -11,6 +13,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -27,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_PHOTO = 0;
   private static final int REQUEST_SELECT_IMAGE_IN_ALBUM = 1;
   private static final String TAG = "MainActivity";
+  private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 111 ;
   private Context mContext = MainActivity.this;
 
   // The URI of photo taken with camera
@@ -36,6 +41,17 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    if (ContextCompat.checkSelfPermission(this,
+      Manifest.permission.READ_EXTERNAL_STORAGE)
+      != PackageManager.PERMISSION_GRANTED) {
+
+      ActivityCompat.requestPermissions(this,
+        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+
+    }
 
 
     if (getString(R.string.subscription_key).startsWith("Please")) {
