@@ -1,6 +1,9 @@
 package shetty.devesh.com.emotionapp;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.microsoft.projectoxford.emotion.EmotionServiceClient;
@@ -35,15 +40,20 @@ import com.microsoft.projectoxford.face.contract.Face;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import shetty.devesh.com.emotionapp.data.BeatBox;
 import shetty.devesh.com.emotionapp.helper.ImageHelper;
 import shetty.devesh.com.emotionapp.model.Song;
+import shetty.devesh.com.emotionapp.util.StorageUtil;
 
 public class MoodActivity extends AppCompatActivity {
 
   public static final String PHOTO_URI = "PHOTO_URI";
+
+  public static final String Broadcast_PLAY_NEW_AUDIO = "shetty.devesh.com.emotionapp.PLAY_NEW_AUDIO";
+
 
   // Flag to indicate which task is to be performed.
   private static final int REQUEST_SELECT_IMAGE = 0;
@@ -70,6 +80,75 @@ public class MoodActivity extends AppCompatActivity {
 
   private FloatingActionButton fab;
 
+  private MediaPlayerService player;
+  boolean serviceBound = false;
+
+  private List<Song> mAudioList;
+
+
+  //Binding this Client to the AudioPlayer Service
+  private ServiceConnection serviceConnection = new ServiceConnection() {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+      // We've bound to LocalService, cast the IBinder and get LocalService instance
+      MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+      player = binder.getService();
+      serviceBound = true;
+
+      Toast.makeText(MoodActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+      serviceBound = false;
+    }
+  };
+
+  private void playAudio(int audioIndex) {
+    //Check is service is active
+    if (!serviceBound) {
+      //Store Serializable audioList to SharedPreferences
+      StorageUtil storage = new StorageUtil(getApplicationContext());
+      storage.storeAudio(mAudioList);
+      storage.storeAudioIndex(audioIndex);
+
+      Intent playerIntent = new Intent(this, MediaPlayerService.class);
+      startService(playerIntent);
+      bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    } else {
+      //Store the new audioIndex to SharedPreferences
+      StorageUtil storage = new StorageUtil(getApplicationContext());
+      storage.storeAudioIndex(audioIndex);
+
+      //Service is active
+      //Send a broadcast to the service -> PLAY_NEW_AUDIO
+      Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+      sendBroadcast(broadcastIntent);
+    }
+  }
+
+  @Override
+  public void onSaveInstanceState(Bundle savedInstanceState) {
+    savedInstanceState.putBoolean("ServiceState", serviceBound);
+    super.onSaveInstanceState(savedInstanceState);
+  }
+
+  @Override
+  public void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    serviceBound = savedInstanceState.getBoolean("ServiceState");
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    if (serviceBound) {
+      unbindService(serviceConnection);
+      //service is active
+      player.stopSelf();
+    }
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -79,6 +158,7 @@ public class MoodActivity extends AppCompatActivity {
 
     mBeatBox = new BeatBox(this);
 
+    mAudioList = mBeatBox.getSounds();
 
     fab = (FloatingActionButton) findViewById(R.id.fab_music_control);
     fab.setOnClickListener(new View.OnClickListener() {
@@ -360,7 +440,8 @@ public class MoodActivity extends AppCompatActivity {
     @Override
     public void onClick(View view) {
       fab.setImageResource(android.R.drawable.ic_media_pause);
-      mBeatBox.play(mSong);
+      //mBeatBox.play(mSong);
+      playAudio(mSong.getIndex());
     }
   }
 
@@ -384,7 +465,8 @@ public class MoodActivity extends AppCompatActivity {
       if(position == 0 && isAutoPlayEnabled){
         isAutoPlayEnabled = false;
         fab.setImageResource(android.R.drawable.ic_media_pause);
-        holder.playSound();
+        //holder.playSound();
+        playAudio(position);
       }
     }
 

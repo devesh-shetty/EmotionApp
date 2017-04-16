@@ -31,7 +31,7 @@ import shetty.devesh.com.emotionapp.model.Song;
 public class BeatBox {
   private static final String TAG = "BeatBox";
   private static final long MIN_SONG_DURATION = 90000;
-  private List<Song> mSongs = new ArrayList<>();
+  private ArrayList<Song> mSongs = new ArrayList<>();
 
   private Song mCurrentSound;
 
@@ -56,7 +56,7 @@ public class BeatBox {
     mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
       public void onCompletion(MediaPlayer mediaPlayer) {
-        playNextSong();
+        //playNextSong();
       }
     });
   }

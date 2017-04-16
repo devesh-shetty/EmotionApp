@@ -1,5 +1,7 @@
 package shetty.devesh.com.emotionapp.model;
 
+import java.io.Serializable;
+
 /**
  * Created by deveshshetty on 26/03/17.
  *
@@ -7,7 +9,7 @@ package shetty.devesh.com.emotionapp.model;
  *
  */
 
-public class Song {
+public class Song implements Serializable{
 
   private long id;
 
