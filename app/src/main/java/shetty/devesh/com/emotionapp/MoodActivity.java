@@ -1,5 +1,7 @@
 package shetty.devesh.com.emotionapp;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -165,15 +167,7 @@ public class MoodActivity extends AppCompatActivity {
       @Override
       public void onClick(View view) {
         if(mRecyclerViewSongs.getChildCount() > 0){
-          if(mBeatBox.isMediaPlaying()){
-            fab.setImageResource(android.R.drawable.ic_media_play);
-            mBeatBox.pause();
-          }
-          else
-          {
-            fab.setImageResource(android.R.drawable.ic_media_pause);
-            mBeatBox.play();
-          }
+          Toast.makeText(MoodActivity.this, "Enjoy Music based on your mood", Toast.LENGTH_LONG).show();
         }
       }
     });
@@ -183,6 +177,8 @@ public class MoodActivity extends AppCompatActivity {
     //    mProgressBar.setVisibility(View.VISIBLE);
 
     mRecyclerViewSongs = (RecyclerView) findViewById(R.id.rcv_songs);
+    mRecyclerViewSongs.setAlpha(0.0f);
+
 
     mRecyclerViewSongs.setLayoutManager(new LinearLayoutManager(this));
     mRecyclerViewSongs.setAdapter(new SoundAdapter(mBeatBox.getSounds()));
@@ -401,6 +397,7 @@ public class MoodActivity extends AppCompatActivity {
 
             mTextViewResult.setText(text);
 
+
             faceCanvas.drawRect(r.faceRectangle.left,
               r.faceRectangle.top,
               r.faceRectangle.left + r.faceRectangle.width,
@@ -410,6 +407,18 @@ public class MoodActivity extends AppCompatActivity {
           }
           ImageView imageView = (ImageView) findViewById(R.id.iv_image);
           imageView.setImageDrawable(new BitmapDrawable(getResources(), mBitmap));
+          //mRecyclerViewSongs.setVisibility(View.VISIBLE);
+          mRecyclerViewSongs.animate()
+            .alpha(1.0f)
+            .setDuration(2000)
+            .setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+              super.onAnimationEnd(animation);
+              playAudio(0);
+            }
+          });
+
         }
 
       }
@@ -433,13 +442,9 @@ public class MoodActivity extends AppCompatActivity {
       mSoundButton.setText(mSong.getName());
     }
 
-    public void playSound(){
-      mBeatBox.play(mSong);
-    }
-
     @Override
     public void onClick(View view) {
-      fab.setImageResource(android.R.drawable.ic_media_pause);
+      //fab.setImageResource(android.R.drawable.ic_media_pause);
       //mBeatBox.play(mSong);
       playAudio(mSong.getIndex());
     }
@@ -462,12 +467,12 @@ public class MoodActivity extends AppCompatActivity {
     public void onBindViewHolder(SoundHolder holder, int position) {
       Song sound = mSongs.get(position);
       holder.bindSound(sound);
-      if(position == 0 && isAutoPlayEnabled){
-        isAutoPlayEnabled = false;
-        fab.setImageResource(android.R.drawable.ic_media_pause);
-        //holder.playSound();
-        playAudio(position);
-      }
+//      if(position == 0 && isAutoPlayEnabled){
+//        isAutoPlayEnabled = false;
+//        //fab.setImageResource(android.R.drawable.ic_media_pause);
+//        //holder.playSound();
+//        playAudio(position);
+//      }
     }
 
     @Override
