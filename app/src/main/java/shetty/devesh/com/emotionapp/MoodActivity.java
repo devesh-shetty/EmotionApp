@@ -42,15 +42,25 @@ import com.microsoft.projectoxford.face.contract.Face;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import shetty.devesh.com.emotionapp.data.BeatBox;
 import shetty.devesh.com.emotionapp.helper.ImageHelper;
 import shetty.devesh.com.emotionapp.model.Song;
+import shetty.devesh.com.emotionapp.model.SongFetcher;
 import shetty.devesh.com.emotionapp.util.StorageUtil;
 
-public class MoodActivity extends AppCompatActivity {
+public class MoodActivity extends AppCompatActivity implements Callback<SongFetcher> {
 
   public static final String PHOTO_URI = "PHOTO_URI";
 
@@ -59,6 +69,7 @@ public class MoodActivity extends AppCompatActivity {
 
   // Flag to indicate which task is to be performed.
   private static final int REQUEST_SELECT_IMAGE = 0;
+  private static final String TAG = "MoodActivity";
 
 
   // The URI of the image selected to detect.
@@ -105,6 +116,7 @@ public class MoodActivity extends AppCompatActivity {
       serviceBound = false;
     }
   };
+  private Context mContext = MoodActivity.this;
 
   private void playAudio(int audioIndex) {
     //Check is service is active
@@ -177,7 +189,7 @@ public class MoodActivity extends AppCompatActivity {
     //    mProgressBar.setVisibility(View.VISIBLE);
 
     mRecyclerViewSongs = (RecyclerView) findViewById(R.id.rcv_songs);
-    mRecyclerViewSongs.setAlpha(0.0f);
+    //mRecyclerViewSongs.setAlpha(0.0f);
 
 
     mRecyclerViewSongs.setLayoutManager(new LinearLayoutManager(this));
@@ -298,6 +310,27 @@ public class MoodActivity extends AppCompatActivity {
     }
     return result;
   }
+  @Override
+  public void onResponse(Call<SongFetcher> call, Response<SongFetcher> response) {
+    int code = response.code();
+
+    switch (code){
+
+      case Config.STATUS_CODE_OK:
+        //HTTP request was successful
+
+        Log.d(TAG, response.body().toString());
+
+        break;
+
+      default:
+        Toast.makeText(mContext, "Error code: "+code, Toast.LENGTH_LONG).show();
+    }
+  }
+  @Override
+  public void onFailure(Call<SongFetcher> call, Throwable t) {
+    Toast.makeText(mContext, "Please, check your internet connection.", Toast.LENGTH_LONG).show();
+  }
 
   private class doRequest extends AsyncTask<String, String, List<RecognizeResult>> {
     // Store error message
@@ -330,7 +363,7 @@ public class MoodActivity extends AppCompatActivity {
     protected void onPostExecute(List<RecognizeResult> result) {
       super.onPostExecute(result);
       // Display based on error existence
-
+      Mood mood = null;
       if (this.useFaceRectangles == false) {
         //mTextViewResult.append("\n\nRecognizing emotions with auto-detected face rectangles...\n");
       } else {
@@ -343,6 +376,7 @@ public class MoodActivity extends AppCompatActivity {
         if (result.size() == 0) {
           mTextViewResult.append("No emotion detected :(");
         } else {
+
           Integer count = 0;
           // Covert bitmap to a mutable bitmap by copying it
           Bitmap bitmapCopy = mBitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -355,43 +389,53 @@ public class MoodActivity extends AppCompatActivity {
 
           for (RecognizeResult r : result) {
 
+
+
             String text = "Angry";
             double max = r.scores.anger;
+            mood = Mood.ANGRY;
 
             if (r.scores.contempt > max) {
               text = "Contempt";
               max = r.scores.contempt;
+              mood = Mood.CONTEMPT;
             }
 
             if (r.scores.disgust > max) {
               text = "Disgust";
               max = r.scores.disgust;
+              mood = Mood.DISGUST;
             }
 
             if (r.scores.fear > max) {
               text = "Fear";
               max = r.scores.fear;
+              mood = Mood.FEAR;
             }
 
             if (r.scores.happiness > max) {
               text = "Happiness";
               max = r.scores.happiness;
+              mood = Mood.HAPPY;
             }
 
             if (r.scores.neutral > max) {
               text = "Neutral";
               max = r.scores.neutral;
+              mood = Mood.NEUTRAL;
             }
 
             if (r.scores.sadness > max) {
               text = "Sadness";
               max = r.scores.sadness;
+              mood = Mood.SAD;
 
             }
 
             if (r.scores.surprise > max) {
               text = "Surprise";
               max = r.scores.surprise;
+              mood = Mood.SURPRISE;
 
             }
 
@@ -408,22 +452,35 @@ public class MoodActivity extends AppCompatActivity {
           ImageView imageView = (ImageView) findViewById(R.id.iv_image);
           imageView.setImageDrawable(new BitmapDrawable(getResources(), mBitmap));
           //mRecyclerViewSongs.setVisibility(View.VISIBLE);
-          mRecyclerViewSongs.animate()
-            .alpha(1.0f)
-            .setDuration(2000)
-            .setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-              super.onAnimationEnd(animation);
-              playAudio(0);
-            }
-          });
+
+
 
         }
 
       }
       //mProgressBar.setVisibility(View.GONE);
+      if(mood != null){
+        fetchSongsBasedOnMood(mood);
+        mood = null;
+      }
     }
+  }
+
+  public enum Mood{
+    HAPPY, SAD, SURPRISE, CONTEMPT,
+    NEUTRAL, FEAR, DISGUST, ANGRY
+  }
+
+  private void fetchSongsBasedOnMood(Mood mood){
+    Retrofit retrofit = new Retrofit.Builder()
+                                    .baseUrl(Constant.BASE_URL)
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build();
+
+    EmotionTaskAPI emotionTaskAPI = retrofit.create(EmotionTaskAPI.class);
+    Call<SongFetcher> call = emotionTaskAPI.fetchHappySongs();
+    call.enqueue(this);
+
   }
 
   private class SoundHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
