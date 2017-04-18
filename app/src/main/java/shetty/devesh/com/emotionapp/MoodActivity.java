@@ -319,8 +319,24 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
       case Config.STATUS_CODE_OK:
         //HTTP request was successful
 
-        Log.d(TAG, response.body().toString());
+        SongFetcher songResponse = response.body();
+        Log.d(TAG, "Response: "+ response.body().toString());
 
+        List<String> songList = songResponse.getData();
+        String slug = songResponse.getSlug();
+
+        mAudioList.clear();
+
+        int index = 0;
+        for(String songName: songList){
+          //String path = Constant.BASE_URL+ slug + songName;
+          //Log.d(TAG, "Song path: "+path);
+          Song song = new Song(songName);
+          song.setIndex(index++);
+          mAudioList.add(song);
+        }
+
+        playAudio(0);
         break;
 
       default:
@@ -329,6 +345,7 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
   }
   @Override
   public void onFailure(Call<SongFetcher> call, Throwable t) {
+    Log.d(TAG, "Error: "+t.getMessage());
     Toast.makeText(mContext, "Please, check your internet connection.", Toast.LENGTH_LONG).show();
   }
 

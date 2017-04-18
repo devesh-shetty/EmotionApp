@@ -6,7 +6,7 @@ package shetty.devesh.com.emotionapp;
 
 public class Constant {
 
-  public static final String BASE_URL = "http://192.168.0.105/EmotionAppServer/";
-  public static final String SLUG_HAPPY_SONGS = "happy/";
+  public static final String BASE_URL = "http://192.168.0.102/EmotionAppServer/";
+  public static final String BASE_FILE = "index.php";
 
 }

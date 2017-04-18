@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "642558020748",
+    "firebase_url": "https://emotionapp-b2a54.firebaseio.com",
+    "project_id": "emotionapp-b2a54",
+    "storage_bucket": "emotionapp-b2a54.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642558020748:android:3865410323b9f971",
+        "android_client_info": {
+          "package_name": "shetty.devesh.com.emotionapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642558020748-5l67gj70i1p7iehv064ijlrt9taf0vb6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "shetty.devesh.com.emotionapp",
+            "certificate_hash": "3c452c361d54eb3a1686ca4086c55f56931d2ab3"
+          }
+        },
+        {
+          "client_id": "642558020748-1i21b8t95e94pko986rh0tpm8pai4nq0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwzbDjOyCSnWdrNhypdoVPy5ggqcdJb-E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642558020748-1i21b8t95e94pko986rh0tpm8pai4nq0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

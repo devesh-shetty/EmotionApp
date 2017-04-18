@@ -10,7 +10,7 @@ import shetty.devesh.com.emotionapp.model.SongFetcher;
 
 public interface EmotionTaskAPI {
 
-  @GET(Constant.SLUG_HAPPY_SONGS)
+  @GET(Constant.BASE_FILE)
   Call<SongFetcher> fetchHappySongs();
 
 }
