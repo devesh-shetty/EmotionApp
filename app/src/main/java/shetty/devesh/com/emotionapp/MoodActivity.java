@@ -30,6 +30,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.microsoft.projectoxford.emotion.EmotionServiceClient;
 import com.microsoft.projectoxford.emotion.EmotionServiceRestClient;
@@ -46,6 +51,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -87,8 +93,6 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
 
   private RecyclerView mRecyclerViewSongs;
 
-  private BeatBox mBeatBox;
-
   private  boolean isAutoPlayEnabled = true;
 
   private FloatingActionButton fab;
@@ -116,7 +120,9 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
       serviceBound = false;
     }
   };
+
   private Context mContext = MoodActivity.this;
+  private SoundAdapter mSoundAdapter;
 
   private void playAudio(int audioIndex) {
     //Check is service is active
@@ -170,9 +176,7 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    mBeatBox = new BeatBox(this);
-
-    mAudioList = mBeatBox.getSounds();
+    mAudioList = new ArrayList<>();
 
     fab = (FloatingActionButton) findViewById(R.id.fab_music_control);
     fab.setOnClickListener(new View.OnClickListener() {
@@ -191,9 +195,9 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
     mRecyclerViewSongs = (RecyclerView) findViewById(R.id.rcv_songs);
     //mRecyclerViewSongs.setAlpha(0.0f);
 
-
+    mSoundAdapter = new SoundAdapter(mAudioList);
     mRecyclerViewSongs.setLayoutManager(new LinearLayoutManager(this));
-    mRecyclerViewSongs.setAdapter(new SoundAdapter(mBeatBox.getSounds()));
+    mRecyclerViewSongs.setAdapter(mSoundAdapter);
 
     if (client == null) {
       client = new EmotionServiceRestClient(getString(R.string.subscription_key));
@@ -477,6 +481,8 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
       }
       //mProgressBar.setVisibility(View.GONE);
       if(mood != null){
+
+
         fetchSongsBasedOnMood(mood);
         mood = null;
       }
@@ -488,7 +494,66 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
     NEUTRAL, FEAR, DISGUST, ANGRY
   }
 
+
   private void fetchSongsBasedOnMood(Mood mood){
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    DatabaseReference parentRef = firebaseDatabase.getReference(Constant.FB_MAIN_REF);
+
+    mAudioList.clear();
+
+    String childRef = "";
+
+    if(mood == Mood.HAPPY){
+      childRef = Constant.FB_CHILD_HAPPY_REF;
+    }
+    else if(mood == Mood.ANGRY){
+      childRef = Constant.FB_CHILD_ANGRY_REF;
+    }
+    else if(mood == Mood.SAD){
+      childRef = Constant.FB_CHILD_SAD_REF;
+    }
+    else if(mood == Mood.SURPRISE){
+      childRef = Constant.FB_CHILD_SURPRISE_REF;
+    }
+    else if(mood == Mood.CONTEMPT){
+      childRef = Constant.FB_CHILD_CONTEMPT_REF;
+    }
+    else if(mood == Mood.NEUTRAL){
+      childRef = Constant.FB_CHILD_NEUTRAL_REF;
+    }
+    else if(mood == Mood.FEAR){
+      childRef = Constant.FB_CHILD_FEAR_REF;
+    }else{
+      //disgust
+      childRef = Constant.FB_CHILD_DISGUST_REF;
+    }
+
+
+    parentRef.child(childRef).addListenerForSingleValueEvent(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot dataSnapshot) {
+        Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+        int index = 0;
+        for (DataSnapshot child : children){
+          Song s = child.getValue(Song.class);
+          s.setIndex(index++);
+          Log.d(TAG, s.toString());
+
+          mAudioList.add(s);
+        }
+        mSoundAdapter.notifyDataSetChanged();
+        playAudio(0);
+
+      }
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+
+      }
+    });
+
+  }
+
+  /*private void fetchSongsBasedOnMood(Mood mood){
     Retrofit retrofit = new Retrofit.Builder()
                                     .baseUrl(Constant.BASE_URL)
                                     .addConverterFactory(GsonConverterFactory.create())
@@ -498,7 +563,7 @@ public class MoodActivity extends AppCompatActivity implements Callback<SongFetc
     Call<SongFetcher> call = emotionTaskAPI.fetchHappySongs();
     call.enqueue(this);
 
-  }
+  }*/
 
   private class SoundHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 

@@ -22,6 +22,7 @@ import android.support.v7.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -442,7 +443,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     try {
       // Set the data source to the mediaFile location
-      mediaPlayer.setDataSource(activeAudio.getPath());
+      mediaPlayer.setDataSource(activeAudio.getLink());
     } catch (IOException e) {
       e.printStackTrace();
       stopSelf();
